@@ -9,7 +9,8 @@
             font-family: Arial, sans-serif; 
             text-align: center; 
             padding: 20px;
-            background-color: #f0f8ff;
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* Градиентный фон */
+            color: white;
         }
         #affirmation {
             margin: 20px;
@@ -20,14 +21,15 @@
             max-width: 80%;
             font-size: 20px;
             font-weight: bold;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.8); /* Мягкий белый фон для аффирмации */
+            color: #333;
         }
         #language-select {
             margin-top: 10px;
             padding: 5px;
             font-size: 16px;
         }
-        #save-btn {
+        #save-btn, #new-affirmation-btn {
             display: block;
             margin: 10px auto;
             padding: 10px 20px;
@@ -38,7 +40,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        #save-btn:hover {
+        #save-btn:hover, #new-affirmation-btn:hover {
             background-color: #45a049;
         }
     </style>
@@ -57,6 +59,7 @@
     </select>
     <div id="affirmation">Loading...</div>
     <button id="save-btn">Save</button>
+    <button id="new-affirmation-btn">New Affirmation</button>
     
     <script>
         async function getAffirmation(language) {
@@ -68,6 +71,8 @@
                 // Translate affirmation
                 let translatedText = await translateText(affirmationText, language);
                 document.getElementById("affirmation").innerText = translatedText;
+                // Сохраняем аффирмацию в локальное хранилище
+                localStorage.setItem("currentAffirmation", translatedText);
             } catch (error) {
                 document.getElementById("affirmation").innerText = "You are amazing!";
             }
@@ -96,12 +101,26 @@
             getAffirmation(savedLanguage);
         }
 
+        // Функция для загрузки сохраненной аффирмации
+        function loadSavedAffirmation() {
+            let savedAffirmation = localStorage.getItem("currentAffirmation");
+            if (savedAffirmation) {
+                document.getElementById("affirmation").innerText = savedAffirmation;
+            }
+        }
+
+        // Обработчики событий
         document.getElementById("language-select").addEventListener("change", function() {
             getAffirmation(this.value);
         });
         document.getElementById("save-btn").addEventListener("click", saveSettings);
+        document.getElementById("new-affirmation-btn").addEventListener("click", function() {
+            let selectedLanguage = document.getElementById("language-select").value;
+            getAffirmation(selectedLanguage);
+        });
 
         loadSettings();
+        loadSavedAffirmation();
     </script>
 </body>
 </html>
