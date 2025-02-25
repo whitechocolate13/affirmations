@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif; 
             text-align: center; 
             padding: 20px;
+            background-color: #f0f8ff;
         }
         #affirmation {
             margin: 20px;
@@ -19,28 +20,88 @@
             max-width: 80%;
             font-size: 20px;
             font-weight: bold;
+            background-color: white;
+        }
+        #language-select {
+            margin-top: 10px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        #save-btn {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #save-btn:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-
     <h1>Your Daily Affirmation</h1>
+    <select id="language-select">
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="it">Italiano</option>
+        <option value="zh">中文</option>
+        <option value="ja">日本語</option>
+    </select>
     <div id="affirmation">Loading...</div>
-
+    <button id="save-btn">Save</button>
+    
     <script>
-        async function getAffirmation() {
-    try {
-        let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
-        let data = await response.json();
-        let affirmationText = JSON.parse(data.contents).affirmation;
-        document.getElementById("affirmation").innerText = affirmationText;
-    } catch (error) {
-        document.getElementById("affirmation").innerText = "You are amazing!";
-    }
-}
+        async function getAffirmation(language) {
+            try {
+                let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
+                let data = await response.json();
+                let affirmationText = JSON.parse(data.contents).affirmation;
+                
+                // Translate affirmation
+                let translatedText = await translateText(affirmationText, language);
+                document.getElementById("affirmation").innerText = translatedText;
+            } catch (error) {
+                document.getElementById("affirmation").innerText = "You are amazing!";
+            }
+        }
 
-getAffirmation();
+        async function translateText(text, targetLang) {
+            if (targetLang === "en") return text; // No translation needed
+            let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                return data.responseData.translatedText || text;
+            } catch (error) {
+                return text;
+            }
+        }
+
+        function saveSettings() {
+            let selectedLanguage = document.getElementById("language-select").value;
+            localStorage.setItem("selectedLanguage", selectedLanguage);
+        }
+
+        function loadSettings() {
+            let savedLanguage = localStorage.getItem("selectedLanguage") || "en";
+            document.getElementById("language-select").value = savedLanguage;
+            getAffirmation(savedLanguage);
+        }
+
+        document.getElementById("language-select").addEventListener("change", function() {
+            getAffirmation(this.value);
+        });
+        document.getElementById("save-btn").addEventListener("click", saveSettings);
+
+        loadSettings();
     </script>
-
 </body>
 </html>
