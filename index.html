@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif; 
             text-align: center; 
             padding: 20px;
-            background: linear-gradient(to right, #ff7e5f, #feb47b); /* Градиентный фон */
+            background: #a8d5ba; /* Нежно-зеленый фон */
             color: white;
         }
         #affirmation {
@@ -21,7 +21,7 @@
             max-width: 80%;
             font-size: 20px;
             font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.8); /* Мягкий белый фон для аффирмации */
+            background-color: rgba(255, 255, 255, 0.8);
             color: #333;
         }
         #language-select {
@@ -29,19 +29,29 @@
             padding: 5px;
             font-size: 16px;
         }
-        #save-btn, #new-affirmation-btn {
+        #save-btn, #new-affirmation-btn, #save-heart-btn {
             display: block;
             margin: 10px auto;
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #d3d3d3; /* Серый цвет для кнопок */
+            color: #333;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        #save-btn:hover, #new-affirmation-btn:hover {
-            background-color: #45a049;
+        #save-btn:hover, #new-affirmation-btn:hover, #save-heart-btn:hover {
+            background-color: #c0c0c0; /* Темнее при наведении */
+        }
+        #save-heart-btn {
+            background: none;
+            font-size: 24px;
+            color: red;
+            border: none;
+            cursor: pointer;
+        }
+        #save-heart-btn:hover {
+            color: darkred;
         }
     </style>
 </head>
@@ -58,8 +68,9 @@
         <option value="ja">日本語</option>
     </select>
     <div id="affirmation">Loading...</div>
-    <button id="save-btn">Save</button>
+    <button id="save-btn">Save Translation</button>
     <button id="new-affirmation-btn">New Affirmation</button>
+    <button id="save-heart-btn">&#10084; Save</button>
     
     <script>
         async function getAffirmation(language) {
@@ -109,6 +120,19 @@
             }
         }
 
+        // Функция для сохранения аффирмации в любимые
+        function saveFavoriteAffirmation() {
+            let currentAffirmation = document.getElementById("affirmation").innerText;
+            let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
+            if (!savedFavorites.includes(currentAffirmation)) {
+                savedFavorites.push(currentAffirmation);
+                localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
+                alert("Affirmation saved to favorites!");
+            } else {
+                alert("This affirmation is already in your favorites.");
+            }
+        }
+
         // Обработчики событий
         document.getElementById("language-select").addEventListener("change", function() {
             getAffirmation(this.value);
@@ -118,6 +142,7 @@
             let selectedLanguage = document.getElementById("language-select").value;
             getAffirmation(selectedLanguage);
         });
+        document.getElementById("save-heart-btn").addEventListener("click", saveFavoriteAffirmation);
 
         loadSettings();
         loadSavedAffirmation();
