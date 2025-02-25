@@ -30,9 +30,10 @@
     <script>
         async function getAffirmation() {
     try {
-        let response = await fetch("https://corsproxy.io/?https://www.affirmations.dev/");
+        let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
         let data = await response.json();
-        document.getElementById("affirmation").innerText = data.affirmation;
+        let affirmationText = JSON.parse(data.contents).affirmation;
+        document.getElementById("affirmation").innerText = affirmationText;
     } catch (error) {
         document.getElementById("affirmation").innerText = "You are amazing!";
     }
