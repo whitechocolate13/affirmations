@@ -3,57 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Daily Affirmation</title>
+    <title>Daily Affirmation</title>
     <style>
-        body {
-            font-family: 'Georgia', serif;
-            text-align: center;
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
             padding: 20px;
-            background-color: #d6cfc4; /* Песочно-бежевый фон */
-            color: black;
+            background: linear-gradient(to right, #ffffff, #a8d5ba); /* Градиент от белого к нежно-зеленому */
+            color: white;
         }
         h1 {
-            font-size: 28px;
-            font-weight: normal;
-        }
-        #affirmation-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 20px auto;
-            max-width: 80%;
-            font-size: 22px;
+            font-size: 30px;
             font-weight: bold;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-shadow: 2px 2px 5px black; /* Черная обводка */
+        }
+        #affirmation {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            display: inline-block;
+            max-width: 80%;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
         }
         #language-select {
+            margin-top: 10px;
+            padding: 5px;
             font-size: 16px;
+        }
+        #save-btn, #new-affirmation-btn, #save-heart-btn, #view-favorites-btn {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #d3d3d3; /* Серый цвет для кнопок */
+            color: #333;
             border: none;
-            background: none;
-            color: black;
-            font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
         }
-        .button {
-            display: inline-block;
-            margin: 15px;
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #645c57;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .button:hover {
-            background-color: #524b47;
+        #save-btn:hover, #new-affirmation-btn:hover, #save-heart-btn:hover, #view-favorites-btn:hover {
+            background-color: #c0c0c0; /* Темнее при наведении */
         }
         #save-heart-btn {
             background: none;
-            font-size: 22px;
-            color: #a52a2a; /* Красное сердечко */
+            font-size: 24px;
+            color: red;
             border: none;
             cursor: pointer;
         }
@@ -61,21 +59,20 @@
             color: darkred;
         }
         #favorites-list {
-            display: none;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 60%;
+            text-align: left;
             margin: 20px auto;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            color: black; /* Изменили цвет текста на черный */
         }
     </style>
 </head>
 <body>
     <h1>Your Daily Affirmation</h1>
-    
     <select id="language-select">
-        <option value="en">SELECT</option>
+        <option value="en">English</option>
         <option value="ru">Русский</option>
         <option value="es">Español</option>
         <option value="fr">Français</option>
@@ -84,60 +81,111 @@
         <option value="zh">中文</option>
         <option value="ja">日本語</option>
     </select>
-    <span>ENGLISH</span>
-
-    <div id="affirmation-container">Loading...</div>
-
-    <button class="button" id="new-affirmation-btn">NEW AFFIRMATION</button>
-    <button id="save-heart-btn">❤️ SAVE</button>
-    <button class="button" id="view-favorites-btn">SHOW SAVED</button>
-
-    <div id="favorites-list">
+    <div id="affirmation">Loading...</div>
+    <button id="save-btn">Save Translation</button>
+    <button id="new-affirmation-btn">New Affirmation</button>
+    <button id="save-heart-btn">&#10084; Save</button>
+    <button id="view-favorites-btn">View Favorites</button>
+    
+    <div id="favorites-list" style="display: none;">
         <h2>Saved Affirmations</h2>
         <ul id="favorites-items"></ul>
-        <button class="button" onclick="closeFavorites()">Close</button>
+        <button onclick="closeFavorites()">Close</button>
     </div>
 
     <script>
-        async function getAffirmation() {
-            let response = await fetch("https://api.affirmations.dev/");
-            let data = await response.json();
-            document.getElementById("affirmation-container").innerText = data.affirmation;
-        }
-
-        function saveFavorite() {
-            let currentAffirmation = document.getElementById("affirmation-container").innerText;
-            let saved = JSON.parse(localStorage.getItem("favorites")) || [];
-            if (!saved.includes(currentAffirmation)) {
-                saved.push(currentAffirmation);
-                localStorage.setItem("favorites", JSON.stringify(saved));
-                alert("Saved!");
-            } else {
-                alert("Already saved.");
+        async function getAffirmation(language) {
+            try {
+                let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
+                let data = await response.json();
+                let affirmationText = JSON.parse(data.contents).affirmation;
+                
+                // Translate affirmation
+                let translatedText = await translateText(affirmationText, language);
+                document.getElementById("affirmation").innerText = translatedText;
+                // Сохраняем аффирмацию в локальное хранилище
+                localStorage.setItem("currentAffirmation", translatedText);
+            } catch (error) {
+                document.getElementById("affirmation").innerText = "You are amazing!";
             }
         }
 
+        async function translateText(text, targetLang) {
+            if (targetLang === "en") return text; // No translation needed
+            let url = https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang};
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                return data.responseData.translatedText || text;
+            } catch (error) {
+                return text;
+            }
+        }
+
+        function saveSettings() {
+            let selectedLanguage = document.getElementById("language-select").value;
+            localStorage.setItem("selectedLanguage", selectedLanguage);
+        }
+
+        function loadSettings() {
+            let savedLanguage = localStorage.getItem("selectedLanguage") || "en";
+            document.getElementById("language-select").value = savedLanguage;
+            getAffirmation(savedLanguage);
+        }
+
+        // Функция для загрузки сохраненной аффирмации
+        function loadSavedAffirmation() {
+            let savedAffirmation = localStorage.getItem("currentAffirmation");
+            if (savedAffirmation) {
+                document.getElementById("affirmation").innerText = savedAffirmation;
+            }
+        }
+
+        // Функция для сохранения аффирмации в любимые
+        function saveFavoriteAffirmation() {
+            let currentAffirmation = document.getElementById("affirmation").innerText;
+            let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
+            if (!savedFavorites.includes(currentAffirmation)) {
+                savedFavorites.push(currentAffirmation);
+                localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
+                alert("Affirmation saved to favorites!");
+            } else {
+                alert("This affirmation is already in your favorites.");
+            }
+        }
+
+        // Функция для отображения сохраненных аффирмаций
         function viewFavorites() {
-            let saved = JSON.parse(localStorage.getItem("favorites")) || [];
-            let list = document.getElementById("favorites-items");
-            list.innerHTML = "";
-            saved.forEach(item => {
-                let li = document.createElement("li");
-                li.innerText = item;
-                list.appendChild(li);
+            let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
+            let favoritesList = document.getElementById("favorites-items");
+            favoritesList.innerHTML = '';
+            savedFavorites.forEach((affirmation, index) => {
+                let listItem = document.createElement("li");
+                listItem.textContent = affirmation;
+                favoritesList.appendChild(listItem);
             });
             document.getElementById("favorites-list").style.display = "block";
         }
 
+        // Функция для закрытия окна с сохраненными аффирмациями
         function closeFavorites() {
             document.getElementById("favorites-list").style.display = "none";
         }
 
-        document.getElementById("new-affirmation-btn").addEventListener("click", getAffirmation);
-        document.getElementById("save-heart-btn").addEventListener("click", saveFavorite);
+        // Обработчики событий
+        document.getElementById("language-select").addEventListener("change", function() {
+            getAffirmation(this.value);
+        });
+        document.getElementById("save-btn").addEventListener("click", saveSettings);
+        document.getElementById("new-affirmation-btn").addEventListener("click", function() {
+            let selectedLanguage = document.getElementById("language-select").value;
+            getAffirmation(selectedLanguage);
+        });
+        document.getElementById("save-heart-btn").addEventListener("click", saveFavoriteAffirmation);
         document.getElementById("view-favorites-btn").addEventListener("click", viewFavorites);
 
-        getAffirmation(); // Load first affirmation
+        loadSettings();
+        loadSavedAffirmation();
     </script>
 </body>
 </html>
