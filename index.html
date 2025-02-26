@@ -189,22 +189,18 @@ body.dark-mode {
     </div>
     <script>
        async function getAffirmation() {
-    let language = localStorage.getItem("selectedLanguage") || "en"; // Используем сохраненный язык
-    try {
-        let response = await fetch("https://www.affirmations.dev/");
-        let data = await response.json();
-        let affirmationText = data.affirmation;
-        
-        let translatedText = await translateText(affirmationText, language);
-        document.getElementById("affirmation").innerText = translatedText;
-        
-        localStorage.setItem("currentAffirmation", translatedText);
-    } catch (error) {
-        document.getElementById("affirmation").innerText = "You are amazing!";
-        document.getElementById("new-affirmation-btn").addEventListener("click", getAffirmation);
-
-    }
-}
+            let language = document.getElementById("language-select").value;
+            try {
+                let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
+                let data = await response.json();
+                let affirmationText = JSON.parse(data.contents).affirmation;
+                let translatedText = await translateText(affirmationText, language);
+                document.getElementById("affirmation").innerText = translatedText;
+                localStorage.setItem("currentAffirmation", translatedText);
+            } catch (error) {
+                document.getElementById("affirmation").innerText = "You are amazing!";
+            }
+        }
         async function translateText(text, targetLang) {
             if (targetLang === "en") return text;
             let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
