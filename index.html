@@ -11,11 +11,6 @@
             padding: 20px;
             background: #f9f6f2; 
             color: black;
-            transition: background 0.3s, color 0.3s;
-        }
-        body.dark-mode {
-            background: #1e1e1e;
-            color: white;
         }
         h1 {
             font-size: 32px;
@@ -25,6 +20,7 @@
             margin: 20px;
             font-size: 24px;
             font-weight: bold;
+            color: black;
         }
         .top-bar {
             display: flex;
@@ -32,6 +28,25 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
+        }
+        #language-select {
+            padding: 5px;
+            font-size: 16px;
+        }
+        #save-btn {
+            font-size: 16px;
+            text-decoration: underline;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: black;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
         }
         .button {
             padding: 10px 20px;
@@ -41,18 +56,9 @@
             background: none;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
         }
         .button:hover {
             background: rgba(0, 0, 0, 0.1);
-        }
-        .button:active {
-            animation: pulse 0.3s;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
         }
         .heart {
             font-size: 24px;
@@ -60,25 +66,19 @@
             background: none;
             border: none;
             cursor: pointer;
-            transition: 0.3s;
         }
         .heart:hover {
             color: red;
-            animation: heartbeat 0.6s infinite;
-        }
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
         }
         #favorites-list {
             display: none;
+            margin-top: 20px;
+            text-align: left;
             background: white;
             padding: 10px;
             border-radius: 8px;
             max-width: 300px;
             margin: auto;
-            position: relative;
         }
         .favorite-item {
             display: flex;
@@ -93,31 +93,11 @@
             color: red;
             font-size: 18px;
         }
-        .delete-btn:hover {
-            opacity: 0.7;
-        }
-        .fade-out {
-            animation: fadeOut 0.5s forwards;
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .close-btn {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 18px;
-        }
     </style>
 </head>
 <body>
     <h1>Your Daily Affirmation</h1>
     <div class="top-bar">
-        <button id="dark-mode-btn">🌙</button>
         <button id="save-btn">SAVE</button>
         <select id="language-select">
             <option value="en">English</option>
@@ -137,27 +117,68 @@
         <button id="view-favorites-btn" class="button">SHOW SAVED</button>
     </div>
     <div id="favorites-list">
-        <button class="close-btn" onclick="closeFavorites()">&times;</button>
         <h2>Saved Affirmations</h2>
         <ul id="favorites-items"></ul>
     </div>
     <script>
-        document.getElementById("dark-mode-btn").addEventListener("click", () => {
-            document.body.classList.toggle("dark-mode");
-        });
+        async function getAffirmation() {
+            let language = document.getElementById("language-select").value;
+            try {
+                let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
+                let data = await response.json();
+                let affirmationText = JSON.parse(data.contents).affirmation;
+                let translatedText = await translateText(affirmationText, language);
+                document.getElementById("affirmation").innerText = translatedText;
+                localStorage.setItem("currentAffirmation", translatedText);
+            } catch (error) {
+                document.getElementById("affirmation").innerText = "You are amazing!";
+            }
+        }
+        async function translateText(text, targetLang) {
+            if (targetLang === "en") return text;
+            let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                return data.responseData.translatedText || text;
+            } catch (error) {
+                return text;
+            }
+        }
+        function saveFavoriteAffirmation() {
+            let currentAffirmation = document.getElementById("affirmation").innerText;
+            let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
+            if (!savedFavorites.includes(currentAffirmation)) {
+                savedFavorites.push(currentAffirmation);
+                localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
+            }
+        }
+        function viewFavorites() {
+            let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
+            let favoritesList = document.getElementById("favorites-items");
+            favoritesList.innerHTML = '';
+            savedFavorites.forEach((affirmation, index) => {
+                let listItem = document.createElement("li");
+                listItem.classList.add("favorite-item");
+                listItem.innerHTML = `${affirmation} <button class='delete-btn' onclick='deleteAffirmation(${index})'>&times;</button>`;
+                favoritesList.appendChild(listItem);
+            });
+            document.getElementById("favorites-list").style.display = "block";
+        }
         function deleteAffirmation(index) {
             let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
-            let listItem = document.querySelectorAll(".favorite-item")[index];
-            listItem.classList.add("fade-out");
-            setTimeout(() => {
-                savedFavorites.splice(index, 1);
-                localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
-                viewFavorites();
-            }, 500);
+            savedFavorites.splice(index, 1);
+            localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
+            viewFavorites();
         }
-        function closeFavorites() {
-            document.getElementById("favorites-list").style.display = "none";
-        }
+        document.getElementById("language-select").addEventListener("change", getAffirmation);
+        document.getElementById("save-btn").addEventListener("click", () => {
+            localStorage.setItem("selectedLanguage", document.getElementById("language-select").value);
+        });
+        document.getElementById("new-affirmation-btn").addEventListener("click", getAffirmation);
+        document.getElementById("save-heart-btn").addEventListener("click", saveFavoriteAffirmation);
+        document.getElementById("view-favorites-btn").addEventListener("click", viewFavorites);
+        getAffirmation();
     </script>
 </body>
 </html>
