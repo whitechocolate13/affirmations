@@ -212,7 +212,8 @@ body.dark-mode {
             savedFavorites.forEach((affirmation, index) => {
                 let listItem = document.createElement("li");
                 listItem.classList.add("favorite-item");
-                listItem.innerHTML = `<span class="affirmation-text">${affirmation}</span> <button class='delete-btn' onclick='deleteAffirmation(${index})'>&times;</button>`;
+                listItem.innerHTML = `${affirmation} <button class='delete-btn' onclick='deleteAffirmation(${index})'>&times;</button>`;
+                favoritesList.appendChild(listItem);
             });
             document.getElementById("favorites-list").style.display = "block";
         }
