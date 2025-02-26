@@ -128,29 +128,18 @@
     </div>
     <script>
         async function getAffirmation() {
-    let language = localStorage.getItem("selectedLanguage") || "en";
-    try {
-        let response = await fetch("https://www.affirmations.dev/");
-        if (!response.ok) throw new Error("Ошибка загрузки аффирмации");
-
-        let data = await response.json();
-        let affirmationText = data.affirmation;
-
-        console.log("Оригинальная аффирмация:", affirmationText); // Проверка в консоли
-
-        if (language !== "en") {
-            affirmationText = await translateText(affirmationText, language);
+            let language = document.getElementById("language-select").value;
+            try {
+                let response = await fetch("https://api.allorigins.win/get?url=https://www.affirmations.dev/");
+                let data = await response.json();
+                let affirmationText = JSON.parse(data.contents).affirmation;
+                let translatedText = await translateText(affirmationText, language);
+                document.getElementById("affirmation").innerText = translatedText;
+                localStorage.setItem("currentAffirmation", translatedText);
+            } catch (error) {
+                document.getElementById("affirmation").innerText = "You are amazing!";
+            }
         }
-
-        console.log("Переведенная аффирмация:", affirmationText); // Проверка в консоли
-
-        document.getElementById("affirmation").innerText = affirmationText;
-        localStorage.setItem("currentAffirmation", affirmationText);
-    } catch (error) {
-        console.error("Ошибка при загрузке:", error);
-        document.getElementById("affirmation").innerText = "You are amazing!";
-    }
-}
         async function translateText(text, targetLang) {
             if (targetLang === "en") return text;
             let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
