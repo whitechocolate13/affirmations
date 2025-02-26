@@ -30,8 +30,22 @@
             margin-bottom: 20px;
         }
         #language-select {
-            padding: 5px;
-            font-size: 16px;
+    border-radius: 10px; /* Закругление углов */
+    padding: 5px 10px; /* Добавляем отступы */
+    border: 2px solid black; /* Чуть выразительнее */
+    background: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.dark-mode #language-select {
+    background: #444;
+    color: white;
+    border-color: white;
+}
+#language-select:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
         }
         #save-btn {
             font-size: 16px;
