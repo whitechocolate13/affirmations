@@ -184,7 +184,12 @@
         document.getElementById("new-affirmation-btn").addEventListener("click", getAffirmation);
         document.getElementById("save-heart-btn").addEventListener("click", saveFavoriteAffirmation);
         document.getElementById("view-favorites-btn").addEventListener("click", viewFavorites);
-        getAffirmation();
+        // Устанавливаем сохранённый язык при загрузке страницы
+document.addEventListener("DOMContentLoaded", () => {
+    let savedLanguage = localStorage.getItem("selectedLanguage") || "en";
+    document.getElementById("language-select").value = savedLanguage;
+    getAffirmation();
+});
     </script>
 </body>
 </html>
