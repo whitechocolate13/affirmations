@@ -130,24 +130,27 @@
         async function getAffirmation() {
     let language = localStorage.getItem("selectedLanguage") || "en";
     try {
-        let response = await fetch("https://www.affirmations.dev/"); 
-        if (!response.ok) throw new Error("Failed to fetch");
-        
+        let response = await fetch("https://www.affirmations.dev/");
+        if (!response.ok) throw new Error("Ошибка загрузки аффирмации");
+
         let data = await response.json();
         let affirmationText = data.affirmation;
+
+        console.log("Оригинальная аффирмация:", affirmationText); // Проверка в консоли
 
         if (language !== "en") {
             affirmationText = await translateText(affirmationText, language);
         }
 
+        console.log("Переведенная аффирмация:", affirmationText); // Проверка в консоли
+
         document.getElementById("affirmation").innerText = affirmationText;
         localStorage.setItem("currentAffirmation", affirmationText);
     } catch (error) {
-        console.error("Error fetching affirmation:", error);
+        console.error("Ошибка при загрузке:", error);
         document.getElementById("affirmation").innerText = "You are amazing!";
     }
 }
-
         async function translateText(text, targetLang) {
             if (targetLang === "en") return text;
             let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
