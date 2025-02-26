@@ -5,88 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Affirmation</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-        
         body { 
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Times New Roman', serif;
             text-align: center; 
             padding: 20px;
-            background: linear-gradient(to right, #fce4ec, #d7fff1); /* Пастельные тона */
+            background-color: #f9f6f2; /* Светлый пастельный фон */
             color: black;
         }
         h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            color: black;
         }
-        #language-container {
+        #top-bar {
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #language-select {
-            padding: 8px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
         }
         #save-btn {
-            padding: 8px 12px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: none;
-            background-color: #ffc107;
+            text-decoration: underline;
             cursor: pointer;
+            margin-right: 10px;
         }
         #affirmation {
-            font-size: 22px;
+            margin: 30px auto;
+            font-size: 24px;
             font-weight: bold;
-            margin: 20px auto;
-            max-width: 80%;
         }
-        #button-container {
+        .button-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
             margin-top: 20px;
         }
-        .action-btn {
-            padding: 12px 18px;
+        .button {
+            padding: 15px 20px;
             font-size: 16px;
+            border: 2px solid black;
+            background: none;
             border-radius: 30px;
-            border: none;
             cursor: pointer;
-            background-color: #ffab91;
-            color: white;
+            margin: 0 20px;
+            font-weight: bold;
+            transition: 0.3s;
         }
-        .action-btn:hover {
-            background-color: #ff8a65;
+        .button:hover {
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
         }
         #save-heart-btn {
-            background: none;
-            font-size: 24px;
-            color: red;
+            font-size: 18px;
+            color: white;
+            background-color: #8B0000;
             border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             cursor: pointer;
+            transition: 0.3s;
+        }
+        #save-heart-btn:hover {
+            background-color: #600000;
+            box-shadow: 0px 0px 15px rgba(139, 0, 0, 0.6);
         }
         #favorites-list {
-            text-align: left;
-            margin: 20px auto;
-            max-width: 80%;
-            background-color: rgba(255, 255, 255, 0.9);
+            margin-top: 40px;
             padding: 15px;
+            max-width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: white;
             border-radius: 10px;
-            color: black;
+            text-align: left;
+            display: none;
+        }
+        .delete-btn {
+            margin-left: 10px;
+            cursor: pointer;
+            color: red;
         }
     </style>
 </head>
 <body>
     <h1>Your Daily Affirmation</h1>
-    
-    <div id="language-container">
+    <div id="top-bar">
+        <span id="save-btn">SAVE</span>
         <select id="language-select">
             <option value="en">English</option>
             <option value="ru">Русский</option>
@@ -97,23 +101,18 @@
             <option value="zh">中文</option>
             <option value="ja">日本語</option>
         </select>
-        <button id="save-btn">Save</button>
     </div>
-    
     <div id="affirmation">Loading...</div>
-    
-    <div id="button-container">
-        <button class="action-btn" id="new-affirmation-btn">New Affirmation</button>
-        <button id="save-heart-btn">&#10084;</button>
-        <button class="action-btn" id="view-favorites-btn">Show Saved</button>
+    <div class="button-container">
+        <button class="button" id="new-affirmation-btn">NEW AFFIRMATION</button>
+        <button id="save-heart-btn">SAVE</button>
+        <button class="button" id="view-favorites-btn">SHOW SAVED</button>
     </div>
-    
-    <div id="favorites-list" style="display: none;">
+    <div id="favorites-list">
         <h2>Saved Affirmations</h2>
         <ul id="favorites-items"></ul>
         <button onclick="closeFavorites()">Close</button>
     </div>
-
     <script>
         async function getAffirmation(language) {
             try {
@@ -127,7 +126,6 @@
                 document.getElementById("affirmation").innerText = "You are amazing!";
             }
         }
-
         async function translateText(text, targetLang) {
             if (targetLang === "en") return text;
             let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
@@ -139,18 +137,6 @@
                 return text;
             }
         }
-
-        function saveSettings() {
-            let selectedLanguage = document.getElementById("language-select").value;
-            localStorage.setItem("selectedLanguage", selectedLanguage);
-        }
-
-        function loadSettings() {
-            let savedLanguage = localStorage.getItem("selectedLanguage") || "en";
-            document.getElementById("language-select").value = savedLanguage;
-            getAffirmation(savedLanguage);
-        }
-
         function saveFavoriteAffirmation() {
             let currentAffirmation = document.getElementById("affirmation").innerText;
             let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
@@ -158,38 +144,37 @@
                 savedFavorites.push(currentAffirmation);
                 localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
                 alert("Affirmation saved to favorites!");
-            } else {
-                alert("This affirmation is already in your favorites.");
             }
         }
-
         function viewFavorites() {
             let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
             let favoritesList = document.getElementById("favorites-items");
             favoritesList.innerHTML = '';
-            savedFavorites.forEach(affirmation => {
+            savedFavorites.forEach((affirmation, index) => {
                 let listItem = document.createElement("li");
                 listItem.textContent = affirmation;
+                let deleteBtn = document.createElement("span");
+                deleteBtn.textContent = " ❌";
+                deleteBtn.classList.add("delete-btn");
+                deleteBtn.onclick = function() {
+                    savedFavorites.splice(index, 1);
+                    localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
+                    viewFavorites();
+                };
+                listItem.appendChild(deleteBtn);
                 favoritesList.appendChild(listItem);
             });
             document.getElementById("favorites-list").style.display = "block";
         }
-
         function closeFavorites() {
             document.getElementById("favorites-list").style.display = "none";
         }
-
-        document.getElementById("language-select").addEventListener("change", function() {
-            getAffirmation(this.value);
-        });
-        document.getElementById("save-btn").addEventListener("click", saveSettings);
         document.getElementById("new-affirmation-btn").addEventListener("click", function() {
             getAffirmation(document.getElementById("language-select").value);
         });
         document.getElementById("save-heart-btn").addEventListener("click", saveFavoriteAffirmation);
         document.getElementById("view-favorites-btn").addEventListener("click", viewFavorites);
-
-        loadSettings();
+        getAffirmation("en");
     </script>
 </body>
 </html>
