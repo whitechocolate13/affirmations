@@ -195,7 +195,7 @@ body.dark-mode {
        async function getAffirmation() {
     let language = document.getElementById("language-select").value;
     try {
-        let response = await fetch("https://api.allorigins.win/raw?url=https://www.affirmations.dev/");
+        let response = await fetch(`https://api.allorigins.win/raw?url=https://www.affirmations.dev/?t=${new Date().getTime()}`);
         let data = await response.json();
         let affirmationText = data.affirmation;
         let translatedText = await translateText(affirmationText, language);
