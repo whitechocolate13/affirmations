@@ -172,6 +172,11 @@ body.dark-mode {
         .dark-mode #dark-mode-btn:hover {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
+        .fade-out {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
     </style>
 </head>
 <body>
@@ -248,10 +253,17 @@ body.dark-mode {
             document.getElementById("favorites-list").style.display = "block";
         }
         function deleteAffirmation(index) {
+    let listItems = document.querySelectorAll(".favorite-item");
+    if (listItems[index]) {
+        listItems[index].classList.add("fade-out"); 
+        setTimeout(() => {
             let savedFavorites = JSON.parse(localStorage.getItem("favoriteAffirmations")) || [];
             savedFavorites.splice(index, 1);
             localStorage.setItem("favoriteAffirmations", JSON.stringify(savedFavorites));
             viewFavorites();
+        }, 300); // Удаляем после анимации
+    }
+}
         }
         document.getElementById("language-select").addEventListener("change", getAffirmation);
         document.getElementById("save-btn").addEventListener("click", () => {
